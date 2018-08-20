@@ -1,0 +1,20 @@
+{
+  "name": "MapProject",
+  "homepage": "https://github.com/JimNero009/MapProject",
+  "authors": [
+    "Jim Cockburn <jim.cockburn@skyscanner.net>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "knockout": "^3.4.2"
+  }
+}
