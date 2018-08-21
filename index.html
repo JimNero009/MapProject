@@ -9,28 +9,69 @@
         margin: 0;
         padding: 0;
       }
-      #map {
+      .container {
         height: 100%;
+        position: relative;
+      }
+      input {
+        font-size: 12px;
+      }
+      h1 {
+        color: #525454;
+        font-size: 22px;
+        margin: 0 0 10px 0;
+        text-align: center;
+      }
+      #hide-listings,
+      #show-listings {
+        width: 48%;
+      }
+      #map {
+        bottom:0px;
+        height: 100%;
+        left: 362px;
+        position: absolute;
+        right: 0px;
+      }
+      .list-box {
+        background: #fff;
+        border: 1px solid #999;
+        border-radius: 3px;
+        height: 100%;
+        line-height: 35px;
+        padding: 10px 10px 30px 10px;
+        text-align: left;
+        width: 340px;
       }
     </style>
   </head>
   <body>
-    <div id="map"></div>
+    <div class="container">
+      <div class="list-box">
+        <h1>Locations</h1>
+        <input type="text" id="filter" onkeyup="filter()" placeholder="Filter location..">
+        <ul>
+        <div id='location-list'></div>
+        </ul>
+      </div>
+      <div id="map"></div>
+    </div>
     <script>
       var map;
-      var markers = []
+      var markers = [];
       function initMap() {
         // Constructor creates a new map - only center and zoom are required.
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 55.951605, lng: -3.1980009},
           zoom: 13
         });
+        listView = document.getElementById('location-list');
         var locations = [
-            {title: 'castle', location: {lat: 55.9485947, lng: -3.2021022}},
-            {title: 'volcano', location: {lat: 55.9440817, lng: -3.1705872}},
-            {title: 'princes', location: {lat: 55.9517733, lng: -3.2005434}},
-            {title: 'uni', location: {lat: 55.9442509, lng: -3.1912994}},
-            {title: 'hollyrood', location: {lat: 55.952715, lng: -3.1744591}}
+            {title: 'Edinburgh Castle', location: {lat: 55.9485947, lng: -3.2021022}},
+            {title: 'Arthur\'s Seat', location: {lat: 55.9440817, lng: -3.1705872}},
+            {title: 'Princes\' Street', location: {lat: 55.9517733, lng: -3.2005434}},
+            {title: 'Edinburgh Unveristy', location: {lat: 55.9442509, lng: -3.1912994}},
+            {title: 'Hollyrood Palace', location: {lat: 55.952715, lng: -3.1744591}}
         ]
         for (var i = 0; i < locations.length; i++) {
           // Get the position from the location array.
@@ -41,11 +82,37 @@
             map: map,
             position: position,
             title: title,
-            animation: google.maps.Animation.DROP,
             id: i
           });
           // Push the marker to our array of markers.
           markers.push(marker);
+          // Add it to the list
+          listView.innerHTML += '<li id=' + i + '>' + title + '</li>';
+        }
+      }
+
+      function showMarker(marker) {
+        marker.setMap(map)
+      }
+
+      function hideMarker(marker) {
+        marker.setMap(null);
+      }
+
+      function filter() {
+        var input, filter, ul, li;
+        input = document.getElementById('filter');
+        filterValue = input.value.toUpperCase();
+        ul = document.getElementById('location-list');
+        li = ul.getElementsByTagName('li');
+        for (var i = 0; i < li.length; i++) {
+          if (li[i].innerHTML.toUpperCase().indexOf(filterValue) > -1) {
+              li[i].style.display = "";
+              showMarker(markers[li[i].id])
+          } else {
+              li[i].style.display = "none";
+              hideMarker(markers[li[i].id])
+          }
         }
       }
     </script>
