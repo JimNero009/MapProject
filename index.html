@@ -59,6 +59,7 @@
     <script>
       var map;
       var markers = [];
+      var wikiUrl = "https://en.wikipedia.org/api/rest_v1/page/summary/"
       function initMap() {
         // Constructor creates a new map - only center and zoom are required.
         map = new google.maps.Map(document.getElementById('map'), {
@@ -67,16 +68,39 @@
         });
         listView = document.getElementById('location-list');
         var locations = [
-            {title: 'Edinburgh Castle', location: {lat: 55.9485947, lng: -3.2021022}},
-            {title: 'Arthur\'s Seat', location: {lat: 55.9440817, lng: -3.1705872}},
-            {title: 'Princes\' Street', location: {lat: 55.9517733, lng: -3.2005434}},
-            {title: 'Edinburgh Unveristy', location: {lat: 55.9442509, lng: -3.1912994}},
-            {title: 'Hollyrood Palace', location: {lat: 55.952715, lng: -3.1744591}}
+            {
+              title: 'Edinburgh Castle',
+              location: {lat: 55.9485947, lng: -3.2021022},
+              link: wikiUrl + 'Edinburgh_Castle'
+            },
+            {
+              title: 'Arthur\'s Seat',
+              location: {lat: 55.9440817, lng: -3.1705872},
+              link: wikiUrl + 'Arthur%27s_Seat'
+            },
+            {
+              title: 'Princes Street',
+              location: {lat: 55.9517733, lng: -3.2005434},
+              link: wikiUrl + 'Princes_Street'
+
+            },
+            {
+              title: 'Edinburgh Unveristy',
+              location: {lat: 55.9442509, lng: -3.1912994},
+              link: wikiUrl + 'University_of_Edinburgh'
+
+            },
+            {
+              title: 'Holyrood Palace',
+              location: {lat: 55.952715, lng: -3.1744591},
+              link: wikiUrl + 'Holyrood_Palace'
+            }
         ]
         for (var i = 0; i < locations.length; i++) {
           // Get the position from the location array.
           var position = locations[i].location;
           var title = locations[i].title;
+          var infoLink = locations[i].link;
           // Create a marker per location, and put into markers array.
           var marker = new google.maps.Marker({
             map: map,
@@ -86,8 +110,18 @@
           });
           // Push the marker to our array of markers.
           markers.push(marker);
+          var placeInfoWindow = new google.maps.InfoWindow();
           // Add it to the list
-          listView.innerHTML += '<li id=' + i + '>' + title + '</li>';
+          // TODO sort out the click binding for below
+          listView.innerHTML += '<li>' + '<button id=' + i + ' onclick=getDetails(' + marker + ',' + placeInfoWindow + ',' + infoLink+ ')>' + title + '</button></li>';
+          // If a marker is clicked, do a place details search on it in the next function.
+          marker.addListener('click', function() {
+            if (placeInfoWindow.marker == this) {
+              console.log("This infowindow already is on this marker!");
+            } else {
+              getDetails(this, placeInfoWindow, infoLink);
+            }
+          });
         }
       }
 
@@ -99,12 +133,25 @@
         marker.setMap(null);
       }
 
+      function getDetails(marker, infoWindow, link) {
+        console.log(link)
+        $.getJSON(link, function(data) {
+          infoWindow.setContent(data.extract_html);
+        })
+        infoWindow.marker = marker
+        infoWindow.open(map, marker);
+        // Make sure the marker property is cleared if the infowindow is closed.
+        infowindow.addListener('closeclick', function() {
+          infoWindow.marker = null;
+        });
+      }
+
       function filter() {
         var input, filter, ul, li;
         input = document.getElementById('filter');
         filterValue = input.value.toUpperCase();
         ul = document.getElementById('location-list');
-        li = ul.getElementsByTagName('li');
+        li = ul.getElementsByTagName('button');
         for (var i = 0; i < li.length; i++) {
           if (li[i].innerHTML.toUpperCase().indexOf(filterValue) > -1) {
               li[i].style.display = "";
@@ -120,6 +167,7 @@
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4NGD1rcRbsrz4v0ofWxqKhId19WslpH4&v=3&callback=initMap">
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
   </body>
 </html>
